@@ -4,8 +4,9 @@ import com.ray.pominowner.menu.domain.Menu;
 import com.ray.pominowner.menu.domain.MenuOptionGroup;
 import com.ray.pominowner.menu.domain.OptionGroup;
 import com.ray.pominowner.menu.repository.MenuRepository;
-import com.ray.pominowner.global.vo.InfoSender;
 import com.ray.pominowner.menu.repository.OptionGroupRepository;
+import com.ray.pominowner.menu.service.vo.OptionGroupInfoToSend;
+import com.ray.pominowner.store.service.aop.TransmitData;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,25 +18,22 @@ public class MenuService {
 
     private final MenuRepository menuRepository;
     private final OptionGroupRepository optionGroupRepository;
-    private final InfoSender infoSender;
 
-    public Long registerMenu(Menu menu) {
-        Long id = menuRepository.save(menu).getId();
-        infoSender.send(menu);
-
-        return id;
+    @TransmitData
+    public Menu registerMenu(Menu menu) {
+        return menuRepository.save(menu);
     }
 
-    public void updateMenu(Menu menu, Long menuId) {
+    @TransmitData
+    public Menu updateMenu(Menu menu, Long menuId) {
         Menu findMenu = menuRepository.findById(menuId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 메뉴가 존재하지 않습니다."));
         Menu updatedMenu = findMenu.updateMenu(menu);
-        menuRepository.save(updatedMenu);
-
-        infoSender.send(updatedMenu);
+        return menuRepository.save(updatedMenu);
     }
 
-    public void addOptionGroupToMenu(Long menuId, Long optionGroupId) {
+    @TransmitData
+    public OptionGroupInfoToSend addOptionGroupToMenu(Long menuId, Long optionGroupId) {
         Menu menu = menuRepository.findById(menuId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 메뉴가 존재하지 않습니다."));
 
@@ -45,7 +43,6 @@ public class MenuService {
         menu.addMenuOptionGroup(new MenuOptionGroup(menu, optionGroup));
         menuRepository.save(menu);
 
-        infoSender.send(menu, optionGroup);
+        return OptionGroupInfoToSend.from(optionGroup, menu);
     }
-
 }

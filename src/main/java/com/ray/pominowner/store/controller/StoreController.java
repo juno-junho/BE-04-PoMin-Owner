@@ -31,7 +31,7 @@ public class StoreController {
 
     @PostMapping
     public ResponseEntity<Void> registerStore(@RequestBody @Valid StoreRegisterRequest request) throws JsonProcessingException {
-        Long storeId = storeService.registerStore(request.toEntity());
+        Long storeId = storeService.registerStore(request.toEntity()).getId();
         return ResponseEntity.created(URI.create("/api/v1/stores/" + storeId)).build();
     }
 

@@ -32,7 +32,7 @@ public class MenuController {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Void> registerMenu(@RequestPart MenuRequest request, @RequestPart MultipartFile image) {
         MenuImage menuImage = menuImageService.saveImage(image);
-        Long menuId = menuService.registerMenu(request.toMenuEntity(menuImage));
+        Long menuId = menuService.registerMenu(request.toMenuEntity(menuImage)).getId();
 
         final String url = "/api/v1/menus/%d".formatted(menuId);
 
